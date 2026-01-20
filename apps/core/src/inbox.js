@@ -14,6 +14,7 @@ const scrapeQueue = new Queue("scrape-queue", {
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
+  keepAlive: true,
 });
 
 const extractRules = [
@@ -72,8 +73,18 @@ const saveIO = async (mediaRows) => {
   return mediaRows.length;
 };
 
-scrapeQueue.process(5, async (job) => {
+const CONCURRENCY = process.env.scra_CONCURRENCY || 2;
+
+scrapeQueue.process(CONCURRENCY, async (job) => {
   const { url } = job.data;
+  const resolveUrl = (src) => {
+    if (!src) return null;
+    try {
+      return new URL(src, url).href;
+    } catch (e) {
+      return null;
+    }
+  };
 
   try {
     const checkRes = await pool.query(
@@ -87,21 +98,21 @@ scrapeQueue.process(5, async (job) => {
 
     console.log(`Processing: ${url}`);
 
-    const { data } = await axios.get(url, {
+    const response = await axios.get(url, {
       timeout: 10000,
+      maxContentLength: 5 * 1024 * 1024,
+      maxBodyLength: 5 * 1024 * 1024,
       httpsAgent: httpsAgent,
       headers: { "User-Agent": "Mozilla/5.0 (Compatible; MediaScraper/1.0)" },
     });
 
-    const resolveUrl = (src) => {
-      if (!src) return null;
-      try {
-        return new URL(src, url).href;
-      } catch (e) {
-        return null;
-      }
-    };
-    const parsed = cheerio.load(data);
+    const contentType = response.headers["content-type"];
+    if (!contentType || !contentType.includes("text/html")) {
+      console.log(`Skipping ${url}: Content-Type is ${contentType} (Not HTML)`);
+      return { status: "skipped", reason: "Not HTML" };
+    }
+
+    const parsed = cheerio.load(response.data);
 
     const mediaRows = crawl(parsed, resolveUrl, url);
 
