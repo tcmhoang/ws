@@ -1,0 +1,27 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^15.2.0",
+    "axios": "^1.13.2",
+    "bull": "^4.16.5",
+    "cheerio": "^1.1.2",
+    "dotenv": "^16.6.1",
+    "koa": "^2.16.3",
+    "koa-bodyparser": "^4.4.1",
+    "pg": "^8.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

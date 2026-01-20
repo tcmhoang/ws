@@ -1,0 +1,29 @@
+[formatter.nix]
+command = "nixpkgs-fmt"
+includes = ["*.nix"]
+
+[formatter.javascript]
+command = "prettier"
+options = ["--write"]
+includes = [
+  "*.js", 
+  "*.jsx", 
+  "*.ts", 
+  "*.tsx", 
+  "*.json", 
+  "*.yaml", 
+  "*.yml", 
+  "*.css", 
+  "*.html", 
+  "*.md"
+]
+
+[global]
+excludes = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/package-lock.json/**",
+  "**/pnpm.lock/**",
+  ".turbo",
+  "apps/*/dist",
+]
